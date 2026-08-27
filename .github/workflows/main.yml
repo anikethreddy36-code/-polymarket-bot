@@ -1,37 +1,32 @@
-name: Polymarket Connection Test
+name: Polymarket Live Bot
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
 
 jobs:
-  test:
+  trade:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - run: pip install py-clob-client
-
-      - name: Test Polymarket
-        env:
-          POLY_PRIVATE_KEY: ${{ secrets.POLY_PRIVATE_KEY }}
+      - name: Install dependencies
         run: |
-          python - <<'PY'
-          import os
-          from py_clob_client.client import ClobClient
+          python -m pip install --upgrade pip
+          pip install polymarket
 
-          client = ClobClient(
-              "https://clob.polymarket.com",
-              key=os.environ["POLY_PRIVATE_KEY"],
-              chain_id=137
-          )
-
-          creds = client.create_or_derive_api_creds()
-          client.set_api_creds(creds)
-
-          print("POLYMARKET CONNECTION SUCCESS")
-          PY
+      - name: Run bot
+        env:
+          POLYMARKET_PRIVATE_KEY: ${{ secrets.POLYMARKET_PRIVATE_KEY }}
+          POLYMARKET_DEPOSIT_WALLET: ${{ secrets.POLYMARKET_DEPOSIT_WALLET }}
+        run: |
+          python bot.py
