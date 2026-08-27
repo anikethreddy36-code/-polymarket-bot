@@ -1,0 +1,37 @@
+name: Polymarket Connection Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install py-clob-client
+
+      - name: Test Polymarket
+        env:
+          POLY_PRIVATE_KEY: ${{ secrets.POLY_PRIVATE_KEY }}
+        run: |
+          python - <<'PY'
+          import os
+          from py_clob_client.client import ClobClient
+
+          client = ClobClient(
+              "https://clob.polymarket.com",
+              key=os.environ["POLY_PRIVATE_KEY"],
+              chain_id=137
+          )
+
+          creds = client.create_or_derive_api_creds()
+          client.set_api_creds(creds)
+
+          print("POLYMARKET CONNECTION SUCCESS")
+          PY
