@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install polymarket
+          pip install py-clob-client
 
       - name: Run bot
         env:
